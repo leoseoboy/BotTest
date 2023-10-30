@@ -1,25 +1,43 @@
 const TelegramBot = require('node-telegram-bot-api');
-const OpenAI = require('openai');
-const token = '6436291008:AAF6CEgLr2GbnxGS2SOUs_Np7OoXSpxo2RI';
-const openai = new OpenAI({ apiKey: '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' });
 
+// Замените 'YOUR_BOT_TOKEN' на ваш токен бота, который вы получили у BotFather.
+const token = '6436291008:AAF6CEgLr2GbnxGS2SOUs_Np7OoXSpxo2RI';
+
+// Создайте экземпляр бота.
 const bot = new TelegramBot(token, { polling: true });
 
-bot.on('message', (msg) => {
+// Обработка команды /start.
+bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, 'Привет! Я ваш Telegram-бот. Для начала работы введите /help.');
+});
+
+// Обработка команды /help.
+bot.onText(/\/help/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, 'Я могу помочь вам с различными задачами. Просто напишите мне что-нибудь.');
+});
+
+// Обработка текстовых сообщений.
+bot.on('text', (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
 
-    openai.createCompletion({
-        engine: 'text-davinci-003', // Используйте подходящую версию GPT-3
-        prompt: text,
-        max_tokens: 50, // Максимальное количество токенов в ответе
-    })
-        .then((response) => {
-            const generatedText = response.choices[0].text;
-            bot.sendMessage(chatId, generatedText);
-        })
-        .catch((error) => {
-            console.error(error);
-            bot.sendMessage(chatId, 'Произошла ошибка при генерации текста.');
-        });
-})
+    // Отправляем ответное сообщение.
+    bot.sendMessage(chatId, `Вы написали: "${text}"`);
+});
+
+// Обработка команды /stop.
+bot.onText(/\/stop/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, 'Пока! Для взаимодействия с ботом снова введите /start.');
+});
+
+// Обработка неопознанных команд и сообщений.
+bot.on('message', (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, 'Извините, я не понимаю эту команду или сообщение. Введите /help для получения справки.');
+});
+
+// Запускаем бот.
+bot.startPolling();
